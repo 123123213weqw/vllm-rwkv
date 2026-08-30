@@ -1,0 +1,24 @@
+name: RWKV7 TPS contract
+
+on:
+  push:
+    paths:
+      - "benchmarks/rwkv7/**"
+      - "scripts/rwkv7/**"
+      - "tests/benchmarks/test_rwkv7_tps_floor_contract.py"
+      - ".github/workflows/rwkv7-tps-contract.yml"
+  pull_request:
+    paths:
+      - "benchmarks/rwkv7/**"
+      - "scripts/rwkv7/**"
+      - "tests/benchmarks/test_rwkv7_tps_floor_contract.py"
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv run --no-project python scripts/rwkv7/test_tps_contract.py
