@@ -22,8 +22,8 @@ tests, and benchmark harness.
 - License: Apache-2.0
 
 The file-level mapping is emitted in every benchmark report by
-`benchmarks/rwkv7/benchmark_faster3a.py`. CUDA sources retain SPDX headers and
-repository history retains original authorship.
+`benchmarks/rwkv7/benchmark_faster3a.py`. CUDA sources retain SPDX headers; the
+original commit history and authorship remain linked through the PR above.
 
 ## Local changes
 
