@@ -3,9 +3,9 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vllm-rwkv7-stateful"
+name = "vllm-rwkv"
 version = "0.1.0"
-description = "RWKV7 registration and stateful edge-cloud components for rwkv-vllm-native"
+description = "RWKV7 registration and stateful edge-cloud components for vllm-rwkv"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -16,7 +16,7 @@ rwkv7_stateful = "vllm_rwkv7_plugin:register"
 
 [project.scripts]
 rwkv-state-router = "vllm.rwkv_stateful.router:main"
-rwkv-vllm-doctor = "vllm_rwkv7_plugin:doctor_main"
+vllm-rwkv-doctor = "vllm_rwkv7_plugin:doctor_main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

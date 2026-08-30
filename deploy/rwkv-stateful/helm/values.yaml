@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/123123213weqw/rwkv-vllm-native
+  repository: ghcr.io/123123213weqw/vllm-rwkv
   tag: cu128
   pullPolicy: IfNotPresent
 

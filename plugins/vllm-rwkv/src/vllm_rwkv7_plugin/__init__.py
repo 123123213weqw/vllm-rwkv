@@ -22,7 +22,7 @@ def compatibility() -> dict[str, object]:
     modules = {name: _module_present(name) for name in required_modules}
     return {
         "compatible": all(modules.values()),
-        "distribution": "rwkv-vllm-native",
+        "distribution": "vllm-rwkv",
         "modules": modules,
     }
 
@@ -32,7 +32,7 @@ def require_compatible() -> None:
     if not report["compatible"]:
         missing = [name for name, present in report["modules"].items() if not present]
         raise RuntimeError(
-            "vllm-rwkv7-stateful requires the rwkv-vllm-native scheduler and "
+            "vllm-rwkv requires the vllm-rwkv scheduler and "
             f"model-state hooks; missing {missing}."
         )
 

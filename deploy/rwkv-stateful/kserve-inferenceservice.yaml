@@ -12,7 +12,7 @@ spec:
     scaleMetric: concurrency
     containers:
       - name: kserve-container
-        image: ghcr.io/123123213weqw/rwkv-vllm-native:cu128
+        image: ghcr.io/123123213weqw/vllm-rwkv:cu128
         command: ["vllm"]
         args:
           - serve

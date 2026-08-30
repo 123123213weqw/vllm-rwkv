@@ -2,7 +2,7 @@
 
 ## Product claim
 
-`rwkv-vllm-native` is a local-first personal-assistant inference runtime that
+`vllm-rwkv` is a local-first personal-assistant inference runtime that
 keeps RWKV's recurrent state close to the user and spills requests to an
 OpenAI-compatible cloud endpoint when the local GPU is unhealthy, full, or the
 prompt exceeds a configurable local limit.
@@ -131,8 +131,8 @@ migration.
 ### Installable plugin delivery
 
 ```bash
-uv pip install ./plugins/vllm-rwkv7
-rwkv-vllm-doctor
+uv pip install ./plugins/vllm-rwkv
+vllm-rwkv-doctor
 ```
 
 The plugin uses vLLM's official `vllm.general_plugins` registration point. It

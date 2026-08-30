@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD001 MD041 -->
 
-# RWKV-vLLM Native
+# vllm-rwkv
 
 This repository is an independent, performance-gated distribution of vLLM
 with native RWKV-7 recurrent-state scheduling and Albatross-derived CUDA
@@ -65,7 +65,7 @@ Project-specific entry points:
 - `benchmarks/rwkv7/benchmark_faster3a.py` — measurement and JSON report.
 - `benchmarks/rwkv7/benchmark_continuous_churn.py` — randomized API-level
   arrival, departure, and cancellation workload.
-- `plugins/vllm-rwkv7` — installable vLLM model-registration and router shim.
+- `plugins/vllm-rwkv` — installable vLLM model-registration and router shim.
 - `deploy/rwkv-stateful` — Docker Compose, Helm, KServe, Prometheus, and
   OpenCost deployment assets.
 - `docs/rwkv7/STATEFUL_EDGE_CLOUD.md` — local-computer/cloud architecture,

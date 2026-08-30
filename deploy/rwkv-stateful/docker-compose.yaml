@@ -1,6 +1,6 @@
 services:
   local-engine:
-    image: ${RWKV_VLLM_IMAGE:-ghcr.io/123123213weqw/rwkv-vllm-native:cu128}
+    image: ${RWKV_VLLM_IMAGE:-ghcr.io/123123213weqw/vllm-rwkv:cu128}
     command:
       - vllm
       - serve
@@ -23,7 +23,7 @@ services:
       context: ../..
       dockerfile: deploy/rwkv-stateful/Dockerfile
       args:
-        RWKV_VLLM_BASE_IMAGE: ${RWKV_VLLM_IMAGE:-ghcr.io/123123213weqw/rwkv-vllm-native:cu128}
+        RWKV_VLLM_BASE_IMAGE: ${RWKV_VLLM_IMAGE:-ghcr.io/123123213weqw/vllm-rwkv:cu128}
     environment:
       RWKV_LOCAL_URL: http://local-engine:8000
       RWKV_CLOUD_URL: ${RWKV_CLOUD_URL:?set RWKV_CLOUD_URL}

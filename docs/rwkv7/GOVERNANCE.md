@@ -1,4 +1,4 @@
-# RWKV-vLLM Native Governance
+# vllm-rwkv Governance
 
 ## Scope
 
