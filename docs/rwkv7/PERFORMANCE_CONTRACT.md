@@ -48,6 +48,13 @@ bash scripts/rwkv7/run_tps_gate.sh
 Reports are written under `evidence/rwkv7/<UTC timestamp>/`. The script exits
 zero only when every case reports `overall_status=passed`.
 
+For a source checkout paired with precompiled base vLLM extensions, build only
+the RWKV product delta with:
+
+```bash
+TORCH_CUDA_ARCH_LIST=8.9 .venv/bin/python scripts/rwkv7/build_ops.py --verbose
+```
+
 ## Interpretation
 
 The hard TPS claim applies to the model-only steady decode lane defined above.
