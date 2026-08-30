@@ -209,6 +209,11 @@ def test_cli_writes_albatross_model_only_measurement_json(
     ]
     assert "--cases" in cmd
     assert "2x4" in cmd
+    assert cmd[cmd.index("--wkv") + 1] == "fp16"
+    assert cmd[cmd.index("--emb") + 1] == "gpu"
+    assert cmd[cmd.index("--batched-rkv") + 1] == "off"
+    assert cmd[cmd.index("--cmix-sparse") + 1] == "no-fc"
+    assert cmd[cmd.index("--lowrank-weight") + 1] == "both"
     assert calls[0][1]["cwd"] == impl_dir
 
 

@@ -475,6 +475,16 @@ def generate_albatross_model_only_measurement(
         str(iters),
         "--cases",
         f"{batch_size}x{seq_len}",
+        "--wkv",
+        "fp16",
+        "--emb",
+        "gpu",
+        "--batched-rkv",
+        "off",
+        "--cmix-sparse",
+        "no-fc",
+        "--lowrank-weight",
+        "both",
     ]
     result = subprocess.run(
         command,
