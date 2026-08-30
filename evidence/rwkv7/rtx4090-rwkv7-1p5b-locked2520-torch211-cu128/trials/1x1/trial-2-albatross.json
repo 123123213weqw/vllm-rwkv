@@ -1,0 +1,44 @@
+{
+  "benchmark": "rwkv7_faster3a",
+  "config": {
+    "albatross_checkpoint": "/home/ubuntu/codex-run/models/raw/rwkv7-g1g-1.5b-20260526-ctx8192.pth",
+    "albatross_command": [
+      "/home/ubuntu/codex-build/rwkv-vllm-native/.venv/bin/python",
+      "/home/ubuntu/codex-run/vendor/Albatross-5e941fb/faster3a_2605/rwkv7_fast_v3a.py",
+      "--model",
+      "/home/ubuntu/codex-run/models/raw/rwkv7-g1g-1.5b-20260526-ctx8192.pth",
+      "--warmup",
+      "20",
+      "--iters",
+      "100",
+      "--cases",
+      "1x1",
+      "--wkv",
+      "fp16",
+      "--emb",
+      "gpu",
+      "--batched-rkv",
+      "off",
+      "--cmix-sparse",
+      "no-fc",
+      "--lowrank-weight",
+      "both"
+    ],
+    "albatross_impl": "faster3a_2605",
+    "albatross_root": "/home/ubuntu/codex-run/vendor/Albatross-5e941fb",
+    "measurement_source": "albatross_subprocess",
+    "repo_root": "/home/ubuntu/codex-build/rwkv-vllm-native"
+  },
+  "model_only_steady_decode": {
+    "albatross_batch_size": 1,
+    "albatross_iters": 100,
+    "albatross_label": "rwkv7_fast_v3a",
+    "albatross_p10_ms": 2.812928,
+    "albatross_p50_ms": 2.815856,
+    "albatross_p90_ms": 2.818048,
+    "albatross_seq_len": 1,
+    "albatross_tokens_per_s": 355.131799,
+    "albatross_warmup": 20
+  },
+  "schema_version": 1
+}

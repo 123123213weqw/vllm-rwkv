@@ -27,10 +27,24 @@ and cancellation-safe request isolation.
 | Default gate cases | `B1T1`, `B16T1`, `B64T1` |
 | Required TPS ratio | `vLLM / Albatross >= 1.00` for every case |
 
+Verified on an RTX 4090 with a locked 2520 MHz graphics clock, four balanced
+paired trials, 20 warmups, and 100 timed CUDA Graph replays:
+
+| Case | Albatross TPS | vLLM TPS | Ratio |
+| --- | ---: | ---: | ---: |
+| `B1T1` | 355.12 | 357.19 | **1.0058x** |
+| `B16T1` | 3,758.31 | 3,785.58 | **1.0073x** |
+| `B64T1` | 11,384.43 | 11,388.71 | **1.0004x** |
+
+The complete machine-readable evidence, environment manifest, reports, and all
+raw trials are committed under
+[`evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128`](evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/RESULTS.md).
+
 Project-specific entry points:
 
 - `scripts/rwkv7/run_tps_gate.sh` — same-machine reproducible TPS gate.
 - `benchmarks/rwkv7/benchmark_faster3a.py` — measurement and JSON report.
+- `scripts/rwkv7/aggregate_model_only_trials.py` — balanced median estimator.
 - `docs/rwkv7/SOURCE_LINEAGE.md` — exact reuse and attribution map.
 - `docs/rwkv7/GOVERNANCE.md` — small-project maintenance policy.
 

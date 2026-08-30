@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "overall_status": "passed",
+  "required_ratio": 1.0,
+  "cases": [
+    {
+      "report": "evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/report-1x1.json",
+      "status": "passed",
+      "albatross_tokens_per_s": 355.1227185,
+      "vllm_tokens_per_s": 357.1918308978516,
+      "vllm_to_albatross_ratio": 1.005826471498617
+    },
+    {
+      "report": "evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/report-16x1.json",
+      "status": "passed",
+      "albatross_tokens_per_s": 3758.310547,
+      "vllm_tokens_per_s": 3785.5846595853036,
+      "vllm_to_albatross_ratio": 1.0072570140876396
+    },
+    {
+      "report": "evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/report-64x1.json",
+      "status": "passed",
+      "albatross_tokens_per_s": 11384.432421000001,
+      "vllm_tokens_per_s": 11388.710823636098,
+      "vllm_to_albatross_ratio": 1.000375811676672
+    }
+  ]
+}

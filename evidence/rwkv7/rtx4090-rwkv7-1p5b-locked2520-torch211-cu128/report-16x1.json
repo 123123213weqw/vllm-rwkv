@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "benchmark": "rwkv7_faster3a",
+  "overall_status": "passed",
+  "source": {
+    "albatross_repo": "https://github.com/BlinkDL/Albatross",
+    "albatross_commit": "5e941fb1eeb7f735a562fb5bbb30fad19adc825b",
+    "albatross_impl": "faster3a_2605"
+  },
+  "acceptance": {
+    "min_vllm_to_albatross_ratio": 1.0,
+    "max_latency_slowdown_pct": 0.0
+  },
+  "check": {
+    "status": "passed",
+    "thresholds": {
+      "min_vllm_to_albatross_ratio": 1.0,
+      "max_latency_slowdown_pct": 0.0
+    },
+    "metrics": {
+      "albatross_tokens_per_s": 3758.310547,
+      "vllm_tokens_per_s": 3785.5846595853036,
+      "vllm_to_albatross_ratio": 1.0072570140876396,
+      "latency_slowdown_pct": -0.7204729265859688
+    },
+    "blockers": [],
+    "errors": []
+  },
+  "measurement": "evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/measurement-16x1.json"
+}

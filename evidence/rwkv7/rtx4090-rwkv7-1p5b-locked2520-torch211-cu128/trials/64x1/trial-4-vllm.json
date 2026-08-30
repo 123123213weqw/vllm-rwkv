@@ -1,0 +1,26 @@
+{
+  "benchmark": "rwkv7_faster3a",
+  "config": {
+    "measurement_source": "vllm_model_direct",
+    "model": "/home/ubuntu/codex-run/models/raw/rwkv7-g1g-1.5b-20260526-ctx8192.pth",
+    "repo_root": "/home/ubuntu/codex-build/rwkv-vllm-native",
+    "vllm_distributed_backend": "nccl"
+  },
+  "model_only_steady_decode": {
+    "vllm_batch_size": 64,
+    "vllm_distributed_backend": "nccl",
+    "vllm_graph": true,
+    "vllm_iters": 100,
+    "vllm_label": "RWKV7ForCausalLM.forward_logits",
+    "vllm_logits_included": true,
+    "vllm_measurement_mode": "cuda_graph_replay",
+    "vllm_output": "logits",
+    "vllm_p10_ms": 5.6156158447265625,
+    "vllm_p50_ms": 5.6196160316467285,
+    "vllm_p90_ms": 5.62278413772583,
+    "vllm_seq_len": 1,
+    "vllm_tokens_per_s": 11388.678450553487,
+    "vllm_warmup": 20
+  },
+  "schema_version": 1
+}

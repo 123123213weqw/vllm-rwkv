@@ -1,0 +1,52 @@
+{
+  "albatross": {
+    "commit": "5e941fb1eeb7f735a562fb5bbb30fad19adc825b",
+    "implementation": "faster3a_2605",
+    "repository": "https://github.com/BlinkDL/Albatross"
+  },
+  "benchmark": {
+    "acceptance_ratio": 1.0,
+    "cases": [
+      "1x1",
+      "16x1",
+      "64x1"
+    ],
+    "cuda_graph": true,
+    "estimator": "median of each side across four balanced trials",
+    "paired_trials": 4,
+    "timed_iterations": 100,
+    "timed_output": "logits",
+    "trial_order": "alternating Albatross-first / vLLM-first",
+    "warmup": 20
+  },
+  "checkpoint": {
+    "filename": "rwkv7-g1g-1.5b-20260526-ctx8192.pth",
+    "sha256": "a593952f515302c9b5326755cb06a40499a4e2a4e54d25eb88babca4430382b5",
+    "shared_by_both_sides": true,
+    "tensor_format": "raw PyTorch state dict reconstructed from the HF shards"
+  },
+  "hardware": {
+    "driver_version": "550.142",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "locked_graphics_clock_mhz": 2520,
+    "max_graphics_clock_mhz": 3105,
+    "max_memory_clock_mhz": 10501,
+    "observed_graphics_clock_mhz": 2520,
+    "observed_memory_clock_mhz": 810,
+    "persistence_mode": "Enabled",
+    "power_limit_w": 450.0
+  },
+  "imported_vllm_rwkv_pr_head": "58907e0e1776d102fc7ea1afecbb7439ef56a11e",
+  "runtime_lane": "vLLM RWKV7ForCausalLM model-only source path with the independently compiled rwkv7_ops CUDA extension",
+  "schema_version": 1,
+  "software": {
+    "cuda_available": true,
+    "nvcc": "Build cuda_12.8.r12.8/compiler.35583870_0",
+    "os": "Linux-5.15.0-128-generic-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "rwkv7_ops_sha256": "1c23002d1d8ca5606a6fb1becb2c925d471d9a3a537e0f78ba097d6e85b9ec8f",
+    "torch": "2.11.0+cu128",
+    "torch_cuda": "12.8"
+  },
+  "source_revision": "f4a4aa81d6e02ed54ffc7bb7b70164a7c057e767"
+}
