@@ -36,6 +36,11 @@ logger = init_logger(__name__)
 
 
 def kernel_warmup(worker: "Worker"):
+    # RWKV7 uses dedicated precompiled recurrent kernels and none of the
+    # attention, MoE, or model-specific JIT warmups below.
+    if worker.get_model().__class__.__name__ == "RWKV7ForCausalLM":
+        return
+
     from vllm.model_executor.warmup.minimax_m3_msa_warmup import (
         minimax_m3_msa_warmup,
     )

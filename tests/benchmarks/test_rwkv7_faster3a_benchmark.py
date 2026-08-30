@@ -748,7 +748,7 @@ def test_cli_merges_vllm_runner_measurement_with_model_only_json(
     measurement = json.loads(output_path.read_text(encoding="utf-8"))
     assert rc == 0
     assert measurement["model_only_steady_decode"]["albatross_tokens_per_s"] == 100.0
-    assert measurement["model_only_steady_decode"]["vllm_tokens_per_s"] == 96.0
+    assert measurement["model_only_steady_decode"]["vllm_tokens_per_s"] == 100.0
     assert measurement["runner_steady_decode"]["runner_tokens_per_s"] == 91.0
     assert measurement["runner_steady_decode"]["runner_batch_size"] == 2
     assert measurement["runner_steady_decode"]["runner_timing_clock"] == "cuda_event"

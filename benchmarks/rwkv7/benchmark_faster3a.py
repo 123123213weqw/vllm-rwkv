@@ -837,6 +837,11 @@ def _required_vllm_runner_model(config: BenchmarkConfig) -> str:
 
 def _create_vllm_runner_llm(config: BenchmarkConfig) -> Any:
     os.environ.setdefault("VLLM_ALLOW_INSECURE_SERIALIZATION", "1")
+    # The runner metric times worker.execute_model(), not token sampling. Avoid
+    # pulling optional FlashInfer into the minimal RWKV distribution or JIT
+    # compiling the rapid sampler outside the measured execution path.
+    os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
+    os.environ.setdefault("VLLM_USE_RAPID_SAMPLER", "0")
 
     import vllm.rwkv7_ops  # noqa: F401
 
