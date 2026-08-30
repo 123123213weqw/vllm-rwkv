@@ -1,0 +1,35 @@
+{
+  "benchmark": "rwkv7_dynamic_state_runner",
+  "cases": [
+    {
+      "active_requests": 1,
+      "model_only_retention": 0.9238783561290997,
+      "p50_ms": 193.93833518028265,
+      "runner_tokens_per_s": 330.0018015546354
+    },
+    {
+      "active_requests": 16,
+      "model_only_retention": 0.935693913766694,
+      "p50_ms": 289.0900797843933,
+      "runner_tokens_per_s": 3542.148526036282
+    },
+    {
+      "active_requests": 64,
+      "model_only_retention": 0.9419941838125578,
+      "p50_ms": 381.8010873794556,
+      "runner_tokens_per_s": 10728.099356954326
+    }
+  ],
+  "decode_tokens": 64,
+  "iters": 5,
+  "prompt_len": 32,
+  "source_revision": "0d29b95fd95e0091ad17631b8c334cd0acd35167",
+  "state_movement": {
+    "decode_compaction_rows": 0,
+    "decode_compactions": 0,
+    "resident_to_decode_copies": 0
+  },
+  "status": "passed",
+  "timing_target": "worker.execute_model",
+  "warmup": 2
+}

@@ -1,0 +1,20 @@
+{
+  "albatross_commit": "5e941fb1eeb7f735a562fb5bbb30fad19adc825b",
+  "albatross_impl": "faster3a_2605",
+  "clock_policy": "graphics clock locked at 2520 MHz during measurements",
+  "gpu": "NVIDIA GeForce RTX 4090, 550.142",
+  "model": "rwkv7-g1g-1.5b-20260526-ctx8192.pth",
+  "model_sha256": "a593952f515302c9b5326755cb06a40499a4e2a4e54d25eb88babca4430382b5",
+  "platform": "Linux-5.15.0-128-generic-x86_64-with-glibc2.35",
+  "precompiled_base_extension_variant": "cu129",
+  "python": "3.12.14",
+  "runner_sampler_policy": {
+    "flashinfer": false,
+    "rapid": false
+  },
+  "rwkv7_ops_build_cuda": "12.8",
+  "source_revision": "0d29b95fd95e0091ad17631b8c334cd0acd35167",
+  "torch": "2.11.0+cu128",
+  "torch_cuda": "12.8",
+  "upstream_vllm_base_commit": "a65f93fb2e295e501b929df3c291ec89c27d39e8"
+}

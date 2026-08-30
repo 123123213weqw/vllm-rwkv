@@ -1,0 +1,31 @@
+{
+  "benchmark": "rwkv7_faster3a",
+  "config": {
+    "measurement_source": "vllm_runner_worker_execute_model",
+    "model": "/home/ubuntu/codex-run/models/raw/rwkv7-g1g-1.5b-20260526-ctx8192.pth",
+    "repo_root": "/home/ubuntu/codex-build/rwkv-vllm-native"
+  },
+  "runner_steady_decode": {
+    "runner_batch_size": 16,
+    "runner_collective_rpc_serialization": "pickle_enabled",
+    "runner_decode_steps": 320,
+    "runner_decode_tokens": 64,
+    "runner_internal_timing_target": "worker.execute_model",
+    "runner_iters": 5,
+    "runner_measurement_mode": "worker_execute_model",
+    "runner_p10_ms": 288.94403123855597,
+    "runner_p50_ms": 289.0900797843933,
+    "runner_p90_ms": 289.5213432312013,
+    "runner_prompt_len": 32,
+    "runner_timing_clock": "cuda_event",
+    "runner_tokens_per_s": 3542.148526036282,
+    "runner_warmup": 2,
+    "runner_worker_count": 1
+  },
+  "schema_version": 1,
+  "state_movement": {
+    "decode_compaction_rows": 0,
+    "decode_compactions": 0,
+    "resident_to_decode_copies": 0
+  }
+}

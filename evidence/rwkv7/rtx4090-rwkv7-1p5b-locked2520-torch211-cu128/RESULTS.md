@@ -22,3 +22,18 @@ See [`summary.json`](summary.json), the per-case reports, raw measurements, all
 24 trial files, and [`environment.json`](environment.json). The result is a
 model-only steady-decode contract; API scheduling throughput is a separate
 serving metric.
+
+## Dynamic recurrent-state runner
+
+The same machine also ran fresh request allocation, 32-token prefill, 64-step
+decode, and request release through the native vLLM worker:
+
+| Active requests | Runner TPS | Model-only retention |
+| ---: | ---: | ---: |
+| 1 | 330.00 | 92.39% |
+| 16 | 3,542.15 | 93.57% |
+| 64 | 10,728.10 | 94.20% |
+
+All cases completed with zero resident-to-decode state copies. See the
+[`dynamic-state`](dynamic-state/RESULTS.md) evidence and its precise metric
+boundary; it is a runner decode measurement rather than end-to-end API TPS.

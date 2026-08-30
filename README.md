@@ -40,6 +40,20 @@ The complete machine-readable evidence, environment manifest, reports, and all
 raw trials are committed under
 [`evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128`](evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/RESULTS.md).
 
+The native vLLM worker was also measured with fresh request IDs, recurrent
+state allocation and release, 32-token prefills, and 64-step decode loops:
+
+| Active requests | Dynamic-state runner TPS | Model-only retention |
+| ---: | ---: | ---: |
+| 1 | 330.00 | 92.39% |
+| 16 | 3,542.15 | 93.57% |
+| 64 | 10,728.10 | 94.20% |
+
+Every case recorded zero resident-to-decode state copies. The committed
+[`dynamic-state` evidence](evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/dynamic-state/RESULTS.md)
+defines the timing boundary and distinguishes runner decode TPS from
+end-to-end API throughput.
+
 Project-specific entry points:
 
 - `scripts/rwkv7/run_tps_gate.sh` — same-machine reproducible TPS gate.

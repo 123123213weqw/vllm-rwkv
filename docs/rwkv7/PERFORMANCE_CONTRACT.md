@@ -61,6 +61,30 @@ the RWKV product delta with:
 TORCH_CUDA_ARCH_LIST=8.9 .venv/bin/python scripts/rwkv7/build_ops.py --verbose
 ```
 
+## Dynamic-state runner lane
+
+The runner lane exercises vLLM request ownership separately from the hard
+Albatross model-loop gate. Each iteration creates fresh request IDs, prefills
+them, performs cached recurrent decode, and releases their state rows:
+
+```bash
+.venv/bin/python benchmarks/rwkv7/benchmark_faster3a.py \
+  --repo-root "$PWD" \
+  --model "$MODEL" \
+  --measure-vllm-runner \
+  --runner-batch-size 16 \
+  --runner-prompt-len 32 \
+  --runner-decode-tokens 64 \
+  --runner-warmup 2 \
+  --runner-iters 5 \
+  --measurement-output dynamic-state.json
+```
+
+Publish the runner TPS together with its state-movement counters. A valid
+steady-decode result must be positive and must report zero
+`resident_to_decode_copies`. Runner TPS is not divided by Albatross TPS because
+Albatross has no equivalent vLLM scheduler or request lifecycle.
+
 ## Interpretation
 
 The hard TPS claim applies to the model-only steady decode lane defined above.
