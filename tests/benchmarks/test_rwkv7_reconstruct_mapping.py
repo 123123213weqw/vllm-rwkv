@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from scripts.rwkv7.reconstruct_pth_from_hf import reverse_name
+import torch
+
+from scripts.rwkv7.reconstruct_pth_from_hf import normalize_raw_tensor, reverse_name
 
 
 def test_top_level_mapping() -> None:
@@ -32,3 +34,14 @@ def test_lora_mapping_restores_orientation() -> None:
         "blocks.2.att.w0",
         False,
     )
+
+
+def test_albatross_source_tensors_are_bfloat16() -> None:
+    value = torch.ones(2, dtype=torch.float16)
+    for key in (
+        "emb.weight",
+        "blocks.0.ln0.weight",
+        "blocks.0.ln0.bias",
+    ):
+        assert normalize_raw_tensor(key, value).dtype == torch.bfloat16
+    assert normalize_raw_tensor("head.weight", value).dtype == torch.float16

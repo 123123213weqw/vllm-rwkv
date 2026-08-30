@@ -31,6 +31,17 @@ _MODULES = {
     "ffn_norm": "ln2",
 }
 
+# Albatross' fused embedding + ln0 preprocessing kernel accepts BF16 input
+# and emits FP16. Converted HF checkpoints may store every tensor as FP16, so
+# preserving shard dtypes verbatim produces a raw checkpoint that the pinned
+# faster3a_2605 baseline cannot load. These are the only tensors consumed
+# before Albatross converts the remaining model weights to FP16.
+_ALBATROSS_BF16_KEYS = {
+    "emb.weight",
+    "blocks.0.ln0.weight",
+    "blocks.0.ln0.bias",
+}
+
 
 def reverse_name(name: str) -> tuple[str, bool]:
     """Return the raw checkpoint key and whether its tensor must transpose."""
@@ -60,6 +71,15 @@ def reverse_name(name: str) -> tuple[str, bool]:
         if head in _PROJECTIONS:
             suffix = _PROJECTIONS[head] + (dot + tail if dot else "")
     return f"blocks.{layer}.{raw_module}.{suffix}", False
+
+
+def normalize_raw_tensor(raw_name: str, tensor):
+    """Restore dtype constraints required by the pinned Albatross loader."""
+    if raw_name in _ALBATROSS_BF16_KEYS:
+        import torch
+
+        return tensor.to(dtype=torch.bfloat16).contiguous()
+    return tensor.contiguous()
 
 
 def _sha256(path: Path) -> str:
@@ -94,7 +114,8 @@ def main() -> int:
             raw_name, transposed = reverse_name(converted_name)
             if raw_name in state:
                 raise KeyError(f"duplicate reconstructed key: {raw_name}")
-            raw_tensor = tensor.t().contiguous() if transposed else tensor.contiguous()
+            raw_tensor = tensor.t() if transposed else tensor
+            raw_tensor = normalize_raw_tensor(raw_name, raw_tensor)
             state[raw_name] = raw_tensor
             tensor_bytes += raw_tensor.numel() * raw_tensor.element_size()
 
