@@ -9,7 +9,6 @@ import json
 import re
 from pathlib import Path
 
-
 _TOP_LEVEL = {
     "model.embeddings.weight": "emb.weight",
     "model.norm.weight": "ln_out.weight",

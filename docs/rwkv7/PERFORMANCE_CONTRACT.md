@@ -21,6 +21,7 @@ Both paths must use all of the following identical controls:
 - FP16 weights and WKV mode;
 - `B x T` case;
 - warmup count and timed iteration count;
+- paired trial count and alternating execution order;
 - logits included in the timed region;
 - CUDA Graph replay for steady decode.
 
@@ -33,6 +34,10 @@ separately because Albatross is a model-loop reference, not an API scheduler.
 The default release matrix is `1x1,16x1,64x1`. Override `CASES` only to add
 coverage. Removing a default case requires a documented hardware constraint.
 Use at least 10 warmups and 30 timed iterations for publishable evidence.
+The release runner defaults to four paired trials. Odd trials execute
+Albatross first and even trials execute vLLM first; the gate compares the
+median TPS for each side so clock drift, thermals, and launch order cannot
+decide a sub-percent result.
 
 ## Reproduction
 
@@ -42,6 +47,7 @@ export ALBATROSS_ROOT=/opt/Albatross
 export CASES=1x1,16x1,64x1
 export WARMUP=10
 export ITERS=30
+export TRIALS=4
 bash scripts/rwkv7/run_tps_gate.sh
 ```
 

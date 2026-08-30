@@ -22,3 +22,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv run --no-project python scripts/rwkv7/test_tps_contract.py
+      - run: uv run --no-project python scripts/rwkv7/test_aggregate_trials.py

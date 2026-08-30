@@ -9,6 +9,7 @@ ALBATROSS_IMPL="${ALBATROSS_IMPL:-faster3a_2605}"
 CASES="${CASES:-1x1,16x1,64x1}"
 WARMUP="${WARMUP:-10}"
 ITERS="${ITERS:-30}"
+TRIALS="${TRIALS:-4}"
 STAMP="${STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}"
 OUT_DIR="${OUT_DIR:-$ROOT/evidence/rwkv7/$STAMP}"
 
@@ -16,6 +17,10 @@ OUT_DIR="${OUT_DIR:-$ROOT/evidence/rwkv7/$STAMP}"
 [[ -f "$MODEL" ]] || { echo "missing checkpoint: $MODEL" >&2; exit 2; }
 [[ -d "$ALBATROSS_ROOT/$ALBATROSS_IMPL" ]] || {
   echo "missing Albatross implementation: $ALBATROSS_ROOT/$ALBATROSS_IMPL" >&2
+  exit 2
+}
+[[ "$TRIALS" =~ ^[1-9][0-9]*$ ]] && ((TRIALS >= 2 && TRIALS % 2 == 0)) || {
+  echo "TRIALS must be an even integer of at least 2: $TRIALS" >&2
   exit 2
 }
 
@@ -26,31 +31,59 @@ reports=()
 for case_name in "${case_list[@]}"; do
   measurement="$OUT_DIR/measurement-${case_name}.json"
   report="$OUT_DIR/report-${case_name}.json"
+  trial_dir="$OUT_DIR/trials/$case_name"
+  mkdir -p "$trial_dir"
+  albatross_trials=()
+  vllm_trials=()
 
-  "$PYTHON" "$ROOT/benchmarks/rwkv7/benchmark_faster3a.py" \
-    --repo-root "$ROOT" \
-    --model "$MODEL" \
-    --albatross-root "$ALBATROSS_ROOT" \
-    --albatross-impl "$ALBATROSS_IMPL" \
-    --albatross-checkpoint "$MODEL" \
-    --measure-albatross-model-only \
-    --albatross-case "$case_name" \
-    --albatross-warmup "$WARMUP" \
-    --albatross-iters "$ITERS" \
-    --measurement-output "$measurement"
+  measure_albatross() {
+    local output="$1"
+    "$PYTHON" "$ROOT/benchmarks/rwkv7/benchmark_faster3a.py" \
+      --repo-root "$ROOT" \
+      --model "$MODEL" \
+      --albatross-root "$ALBATROSS_ROOT" \
+      --albatross-impl "$ALBATROSS_IMPL" \
+      --albatross-checkpoint "$MODEL" \
+      --measure-albatross-model-only \
+      --albatross-case "$case_name" \
+      --albatross-warmup "$WARMUP" \
+      --albatross-iters "$ITERS" \
+      --measurement-output "$output"
+  }
 
-  "$PYTHON" "$ROOT/benchmarks/rwkv7/benchmark_faster3a.py" \
-    --repo-root "$ROOT" \
-    --model "$MODEL" \
-    --albatross-root "$ALBATROSS_ROOT" \
-    --albatross-impl "$ALBATROSS_IMPL" \
-    --albatross-checkpoint "$MODEL" \
-    --measurement-json "$measurement" \
-    --measure-vllm-model-only \
-    --vllm-case "$case_name" \
-    --vllm-warmup "$WARMUP" \
-    --vllm-iters "$ITERS" \
-    --measurement-output "$measurement"
+  measure_vllm() {
+    local output="$1"
+    "$PYTHON" "$ROOT/benchmarks/rwkv7/benchmark_faster3a.py" \
+      --repo-root "$ROOT" \
+      --model "$MODEL" \
+      --albatross-root "$ALBATROSS_ROOT" \
+      --albatross-impl "$ALBATROSS_IMPL" \
+      --albatross-checkpoint "$MODEL" \
+      --measure-vllm-model-only \
+      --vllm-case "$case_name" \
+      --vllm-warmup "$WARMUP" \
+      --vllm-iters "$ITERS" \
+      --measurement-output "$output"
+  }
+
+  for ((trial = 1; trial <= TRIALS; trial++)); do
+    albatross_trial="$trial_dir/trial-${trial}-albatross.json"
+    vllm_trial="$trial_dir/trial-${trial}-vllm.json"
+    albatross_trials+=("$albatross_trial")
+    vllm_trials+=("$vllm_trial")
+    if ((trial % 2 == 1)); then
+      measure_albatross "$albatross_trial"
+      measure_vllm "$vllm_trial"
+    else
+      measure_vllm "$vllm_trial"
+      measure_albatross "$albatross_trial"
+    fi
+  done
+
+  "$PYTHON" "$ROOT/scripts/rwkv7/aggregate_model_only_trials.py" \
+    --albatross "${albatross_trials[@]}" \
+    --vllm "${vllm_trials[@]}" \
+    --output "$measurement"
 
   "$PYTHON" "$ROOT/scripts/rwkv7/write_model_only_report.py" \
     --benchmark "$ROOT/benchmarks/rwkv7/benchmark_faster3a.py" \
