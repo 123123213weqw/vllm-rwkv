@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rwkv-stateful.fullname" . }}-router
+  labels:
+    {{- include "rwkv-stateful.labels" . | nindent 4 }}
+    app.kubernetes.io/component: router
+spec:
+  replicas: {{ .Values.router.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: router
+  template:
+    metadata:
+      labels:
+        {{- include "rwkv-stateful.labels" . | nindent 8 }}
+        app.kubernetes.io/component: router
+    spec:
+      containers:
+        - name: router
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["python", "-m", "vllm.rwkv_stateful.router"]
+          args: ["--host=0.0.0.0", "--port=8080"]
+          env:
+            - name: RWKV_LOCAL_URL
+              value: http://{{ include "rwkv-stateful.fullname" . }}-local:8000
+            - name: RWKV_CLOUD_URL
+              value: {{ ternary (printf "http://%s-cloud:8000" (include "rwkv-stateful.fullname" .)) .Values.cloudEngine.externalUrl .Values.cloudEngine.enabled | quote }}
+            - name: RWKV_LOCAL_CAPACITY
+              value: {{ .Values.router.localCapacity | quote }}
+            - name: RWKV_CLOUD_CAPACITY
+              value: {{ .Values.router.cloudCapacity | quote }}
+            - name: RWKV_LOCAL_MAX_PROMPT_TOKENS
+              value: {{ .Values.router.localMaxPromptTokens | quote }}
+            - name: RWKV_LOCAL_UTILIZATION_LIMIT
+              value: {{ .Values.router.localUtilizationLimit | quote }}
+            - name: RWKV_SESSION_REGISTRY
+              value: /data/sessions.db
+            - name: RWKV_STATE_TRANSFER_SUPPORTED
+              value: {{ ternary "1" "0" .Values.router.stateTransferSupported | quote }}
+            - name: RWKV_CLOUD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.router.apiKeySecretName }}
+                  key: {{ .Values.router.apiKeySecretKey }}
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+          readinessProbe:
+            httpGet: {path: /readyz, port: http}
+          resources:
+            {{- toYaml .Values.router.resources | nindent 12 }}
+          volumeMounts:
+            - name: state
+              mountPath: /data
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: {{ .Values.router.registryClaim }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rwkv-stateful.fullname" . }}-router
+  labels:
+    {{- include "rwkv-stateful.labels" . | nindent 4 }}
+    app.kubernetes.io/component: router
+spec:
+  type: {{ .Values.router.serviceType }}
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: router
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

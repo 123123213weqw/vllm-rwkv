@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rwkv-stateful.fullname" . }}-local
+  labels:
+    {{- include "rwkv-stateful.labels" . | nindent 4 }}
+    app.kubernetes.io/component: local-engine
+spec:
+  replicas: {{ .Values.localEngine.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: local-engine
+  template:
+    metadata:
+      labels:
+        {{- include "rwkv-stateful.labels" . | nindent 8 }}
+        app.kubernetes.io/component: local-engine
+    spec:
+      containers:
+        - name: vllm
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - serve
+            - {{ .Values.model.path | quote }}
+            - --host=0.0.0.0
+            - --port=8000
+            - --max-num-seqs={{ .Values.localEngine.maxNumSeqs }}
+            {{- range .Values.localEngine.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet: {path: /health, port: http}
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.localEngine.resources | nindent 12 }}
+          volumeMounts:
+            - name: model
+              mountPath: {{ .Values.model.path }}
+              subPath: {{ .Values.model.subPath }}
+              readOnly: true
+      volumes:
+        - name: model
+          persistentVolumeClaim:
+            claimName: {{ .Values.model.existingClaim }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rwkv-stateful.fullname" . }}-local
+  labels:
+    {{- include "rwkv-stateful.labels" . | nindent 4 }}
+    app.kubernetes.io/component: local-engine
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: local-engine
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+{{- if .Values.cloudEngine.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rwkv-stateful.fullname" . }}-cloud
+  labels:
+    {{- include "rwkv-stateful.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cloud-engine
+spec:
+  replicas: {{ .Values.cloudEngine.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: cloud-engine
+  template:
+    metadata:
+      labels:
+        {{- include "rwkv-stateful.labels" . | nindent 8 }}
+        app.kubernetes.io/component: cloud-engine
+    spec:
+      containers:
+        - name: vllm
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          args: ["serve", {{ .Values.model.path | quote }}, "--host=0.0.0.0", "--port=8000", "--max-num-seqs={{ .Values.cloudEngine.maxNumSeqs }}", "--enforce-eager"]
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet: {path: /health, port: http}
+            initialDelaySeconds: 30
+          resources:
+            {{- toYaml .Values.cloudEngine.resources | nindent 12 }}
+          volumeMounts:
+            - name: model
+              mountPath: {{ .Values.model.path }}
+              subPath: {{ .Values.model.subPath }}
+              readOnly: true
+      volumes:
+        - name: model
+          persistentVolumeClaim:
+            claimName: {{ .Values.model.existingClaim }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rwkv-stateful.fullname" . }}-cloud
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: cloud-engine
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+{{- end }}

@@ -188,8 +188,13 @@ def _new_rwkv7_model_state(
         num_attention_heads=num_attention_heads,
     )
     vllm_config = SimpleNamespace(
-        model_config=SimpleNamespace(hf_config=hf_config),
+        model_config=SimpleNamespace(
+            hf_config=hf_config,
+            model="rwkv7-test",
+            revision="test-revision",
+        ),
         scheduler_config=SimpleNamespace(max_num_seqs=max_num_reqs),
+        parallel_config=SimpleNamespace(tensor_parallel_size=1),
     )
     return RWKV7ModelState(
         vllm_config=vllm_config,
@@ -197,6 +202,25 @@ def _new_rwkv7_model_state(
         encoder_cache=None,
         device=torch.device("cpu"),
     )
+
+
+def test_rwkv7_request_state_snapshot_restore_round_trip() -> None:
+    state = _new_rwkv7_model_state(max_num_reqs=2)
+    state.add_request(0, _new_request("snapshot-me"))
+    row = state.req_slot_to_row[0]
+    state.shift_state[:, :, row].fill_(3)
+    state.wkv_state[:, row].fill_(5)
+    state.elapsed[row].fill_(17)
+    blob = state.snapshot_request("snapshot-me")
+
+    state.shift_state[:, :, row].zero_()
+    state.wkv_state[:, row].zero_()
+    state.elapsed[row].zero_()
+    state.restore_request("snapshot-me", blob)
+
+    assert torch.all(state.shift_state[:, :, row] == 3)
+    assert torch.all(state.wkv_state[:, row] == 5)
+    assert state.elapsed[row].item() == 17
 
 
 def _assert_same_storage_view(actual: torch.Tensor, expected: torch.Tensor) -> None:

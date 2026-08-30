@@ -1,0 +1,54 @@
+image:
+  repository: ghcr.io/123123213weqw/rwkv-vllm-native
+  tag: cu128
+  pullPolicy: IfNotPresent
+
+model:
+  path: /models/rwkv7.pth
+  existingClaim: rwkv-models
+  subPath: rwkv7-g1g-1.5b-20260526-ctx8192.pth
+
+localEngine:
+  replicas: 1
+  maxNumSeqs: 32
+  extraArgs: ["--enforce-eager"]
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+    requests:
+      cpu: "2"
+      memory: 8Gi
+
+cloudEngine:
+  # Set enabled=true for a second in-cluster pool. Otherwise point externalUrl
+  # at an OpenAI-compatible endpoint in another cluster/cloud.
+  enabled: false
+  replicas: 1
+  externalUrl: https://cloud.example.com
+  maxNumSeqs: 128
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+
+router:
+  replicas: 1
+  serviceType: ClusterIP
+  localCapacity: 32
+  cloudCapacity: 128
+  localMaxPromptTokens: 8192
+  localUtilizationLimit: "0.8"
+  stateTransferSupported: false
+  registryClaim: rwkv-router-state
+  apiKeySecretName: rwkv-cloud-api
+  apiKeySecretKey: api-key
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}

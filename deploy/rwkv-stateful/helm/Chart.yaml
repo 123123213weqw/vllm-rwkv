@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rwkv-stateful
+description: RWKV7 native vLLM with a state-aware local-first/cloud-fallback router
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

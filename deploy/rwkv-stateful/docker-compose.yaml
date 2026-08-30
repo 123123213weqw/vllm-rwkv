@@ -1,0 +1,45 @@
+services:
+  local-engine:
+    image: ${RWKV_VLLM_IMAGE:-ghcr.io/123123213weqw/rwkv-vllm-native:cu128}
+    command:
+      - vllm
+      - serve
+      - /models/rwkv7.pth
+      - --host=0.0.0.0
+      - --port=8000
+      - --max-num-seqs=32
+      - --enforce-eager
+    gpus: all
+    volumes:
+      - ${RWKV_MODEL_PATH:?set RWKV_MODEL_PATH}:/models/rwkv7.pth:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 2s
+      retries: 30
+
+  router:
+    build:
+      context: ../..
+      dockerfile: deploy/rwkv-stateful/Dockerfile
+      args:
+        RWKV_VLLM_BASE_IMAGE: ${RWKV_VLLM_IMAGE:-ghcr.io/123123213weqw/rwkv-vllm-native:cu128}
+    environment:
+      RWKV_LOCAL_URL: http://local-engine:8000
+      RWKV_CLOUD_URL: ${RWKV_CLOUD_URL:?set RWKV_CLOUD_URL}
+      RWKV_LOCAL_CAPACITY: ${RWKV_LOCAL_CAPACITY:-32}
+      RWKV_CLOUD_CAPACITY: ${RWKV_CLOUD_CAPACITY:-128}
+      RWKV_LOCAL_MAX_PROMPT_TOKENS: ${RWKV_LOCAL_MAX_PROMPT_TOKENS:-8192}
+      RWKV_STATE_TRANSFER_SUPPORTED: ${RWKV_STATE_TRANSFER_SUPPORTED:-0}
+      RWKV_CLOUD_API_KEY: ${RWKV_CLOUD_API_KEY:-}
+      RWKV_SESSION_REGISTRY: /data/sessions.db
+    ports:
+      - "8080:8080"
+    volumes:
+      - router-data:/data
+    depends_on:
+      local-engine:
+        condition: service_healthy
+
+volumes:
+  router-data: {}

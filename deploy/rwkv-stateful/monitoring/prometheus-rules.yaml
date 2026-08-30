@@ -1,0 +1,19 @@
+groups:
+  - name: rwkv-stateful
+    rules:
+      - alert: RWKVRouterNoSuccessfulTraffic
+        expr: sum(rate(rwkv_router_requests_total{outcome="success"}[5m])) == 0
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: RWKV router has no successful traffic
+      - alert: RWKVCloudFallbackSurge
+        expr: sum(rate(rwkv_router_fallbacks_total{to_target="cloud"}[5m])) > 5
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: RWKV local capacity or health is causing cloud spillover
+      - record: rwkv:cloud_request_ratio:5m
+        expr: sum(rate(rwkv_router_requests_total{target="cloud"}[5m])) / clamp_min(sum(rate(rwkv_router_requests_total[5m])), 0.000001)
+      - record: rwkv:router_p95_seconds:5m
+        expr: histogram_quantile(0.95, sum by (le, target) (rate(rwkv_router_request_seconds_bucket[5m])))

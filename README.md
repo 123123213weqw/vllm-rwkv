@@ -54,10 +54,22 @@ Every case recorded zero resident-to-decode state copies. The committed
 defines the timing boundary and distinguishes runner decode TPS from
 end-to-end API throughput.
 
+The asynchronous API churn workload also completed 256 mixed-length requests
+at 80 arrivals/second with 42 deliberate cancellations, **zero errors**, and
+1,184.48 end-to-end output TPS. See the committed
+[`continuous-churn` evidence](evidence/rwkv7/rtx4090-rwkv7-1p5b-locked2520-torch211-cu128/continuous-churn/RESULTS.md).
+
 Project-specific entry points:
 
 - `scripts/rwkv7/run_tps_gate.sh` — same-machine reproducible TPS gate.
 - `benchmarks/rwkv7/benchmark_faster3a.py` — measurement and JSON report.
+- `benchmarks/rwkv7/benchmark_continuous_churn.py` — randomized API-level
+  arrival, departure, and cancellation workload.
+- `plugins/vllm-rwkv7` — installable vLLM model-registration and router shim.
+- `deploy/rwkv-stateful` — Docker Compose, Helm, KServe, Prometheus, and
+  OpenCost deployment assets.
+- `docs/rwkv7/STATEFUL_EDGE_CLOUD.md` — local-computer/cloud architecture,
+  state protocol, validation boundary, and roadmap.
 - `scripts/rwkv7/aggregate_model_only_trials.py` — balanced median estimator.
 - `docs/rwkv7/SOURCE_LINEAGE.md` — exact reuse and attribution map.
 - `docs/rwkv7/GOVERNANCE.md` — small-project maintenance policy.

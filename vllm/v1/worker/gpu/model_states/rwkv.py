@@ -8,6 +8,11 @@ import torch.nn as nn
 from vllm.config import VllmConfig
 from vllm.config.compilation import CUDAGraphMode
 from vllm.logger import init_logger
+from vllm.rwkv_stateful.snapshot import (
+    RWKVStateDescriptor,
+    deserialize_snapshot,
+    serialize_snapshot,
+)
 from vllm.tasks import GenerationTask
 from vllm.v1.core.sched.output import NewRequestData
 from vllm.v1.kv_cache_interface import KVCacheConfig
@@ -315,6 +320,88 @@ class RWKV7ModelState(ModelState):
             self.row_to_req_slot[row] = -1
             self.free_rows.add(row)
             self._zero_row(row)
+
+    def _state_descriptor(
+        self,
+        *,
+        model_id: str = "",
+        model_revision: str = "",
+    ) -> RWKVStateDescriptor:
+        parallel_config = self.vllm_config.parallel_config
+        return RWKVStateDescriptor(
+            model_id=model_id or str(getattr(self.model_config, "model", "")),
+            model_revision=model_revision
+            or str(getattr(self.model_config, "revision", "") or ""),
+            layer_offset=self.layer_offset,
+            num_layers=self.num_layers,
+            hidden_size=self.hidden_size,
+            num_heads=self.num_heads,
+            head_size=self.head_size,
+            shift_dtype=str(self.shift_state.dtype).removeprefix("torch."),
+            wkv_dtype=str(self.wkv_state.dtype).removeprefix("torch."),
+            tp_size=int(getattr(parallel_config, "tensor_parallel_size", 1)),
+            tp_rank=int(getattr(self.model, "tp_rank", 0)),
+        )
+
+    def snapshot_request(
+        self,
+        req_id: str,
+        *,
+        model_id: str = "",
+        model_revision: str = "",
+    ) -> bytes:
+        """Serialize one allocated request's recurrent state.
+
+        Callers must quiesce the request while the device-to-host copy runs.
+        """
+        req_index = self.req_id_to_index.get(req_id)
+        if req_index is None:
+            raise KeyError(f"RWKV state for request {req_id!r} is not allocated")
+        row = self.req_slot_to_row[req_index]
+        if row < 0:
+            raise KeyError(f"RWKV state row for request {req_id!r} is missing")
+        return serialize_snapshot(
+            self._state_descriptor(
+                model_id=model_id,
+                model_revision=model_revision,
+            ),
+            {
+                "shift_state": self.shift_state[:, :, row, :],
+                "wkv_state": self.wkv_state[:, row, :, :, :],
+                "elapsed": self.elapsed[row].reshape(1),
+            },
+        )
+
+    def restore_request(
+        self,
+        req_id: str,
+        blob: bytes,
+        *,
+        model_id: str = "",
+        model_revision: str = "",
+    ) -> None:
+        """Restore a snapshot into an already allocated, quiescent request."""
+        req_index = self.req_id_to_index.get(req_id)
+        if req_index is None:
+            raise KeyError(f"RWKV state for request {req_id!r} is not allocated")
+        row = self.req_slot_to_row[req_index]
+        if row < 0:
+            raise KeyError(f"RWKV state row for request {req_id!r} is missing")
+        snapshot = deserialize_snapshot(
+            blob,
+            expected=self._state_descriptor(
+                model_id=model_id,
+                model_revision=model_revision,
+            ),
+        )
+        with torch.no_grad():
+            self.shift_state[:, :, row, :].copy_(
+                snapshot.tensors["shift_state"], non_blocking=False
+            )
+            self.wkv_state[:, row, :, :, :].copy_(
+                snapshot.tensors["wkv_state"], non_blocking=False
+            )
+            self.elapsed[row].copy_(snapshot.tensors["elapsed"][0])
 
     def _remove_decode_row(self, req_index: int, row: int) -> None:
         if self.num_decode_rows <= 0:

@@ -1,0 +1,41 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: rwkv7-native
+  annotations:
+    serving.kserve.io/deploymentMode: Serverless
+spec:
+  predictor:
+    minReplicas: 0
+    maxReplicas: 4
+    scaleTarget: 4
+    scaleMetric: concurrency
+    containers:
+      - name: kserve-container
+        image: ghcr.io/123123213weqw/rwkv-vllm-native:cu128
+        command: ["vllm"]
+        args:
+          - serve
+          - /mnt/models/rwkv7.pth
+          - --host=0.0.0.0
+          - --port=8080
+          - --max-num-seqs=32
+          - --enforce-eager
+        ports:
+          - containerPort: 8080
+            protocol: TCP
+        volumeMounts:
+          - name: model
+            mountPath: /mnt/models/rwkv7.pth
+            subPath: rwkv7-g1g-1.5b-20260526-ctx8192.pth
+            readOnly: true
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: "2"
+            memory: 8Gi
+    volumes:
+      - name: model
+        persistentVolumeClaim:
+          claimName: rwkv-models
